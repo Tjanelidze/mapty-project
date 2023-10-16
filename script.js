@@ -170,14 +170,13 @@ class App {
 
     //If workout cycling, create cycling object
     if (type === 'cycling') {
-      const elevation = +inputCadence.value;
+      const elevation = +inputElevation.value;
       // Check if data is valid
       if (
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration)
       )
         return alert('Inputs have to be positive numbers!');
-
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
 
@@ -261,7 +260,6 @@ class App {
           <span class="workout__unit">m</span>
         </div>
   `;
-
     form.insertAdjacentHTML('afterend', html);
   }
 
