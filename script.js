@@ -74,6 +74,7 @@ class App {
   #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
+  #markers = [];
 
   constructor() {
     // Get user's position
@@ -86,6 +87,7 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+    containerWorkouts.addEventListener('click', this._closeWorkout.bind(this));
   }
 
   _getPosition() {
@@ -197,7 +199,9 @@ class App {
   }
 
   _renderWorkoutMarker(workout) {
-    L.marker(workout.coords)
+    const marker = L.marker(workout.coords);
+    this.#markers.push(marker);
+    marker
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -217,7 +221,10 @@ class App {
   _renderWorkout(workout) {
     let html = `
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
-        <h2 class="workout__title">${workout.description}</h2>
+        <div class="workout__header">
+          <h2 class="workout__title">${workout.description}</h2>
+          <span class="workout__close--btn">&times;</span>
+        </div>
         <div class="workout__details">
           <span class="workout__icon">${
             workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
@@ -281,6 +288,30 @@ class App {
 
     // using the public interface
     // workout.click();
+  }
+
+  _closeWorkout(e) {
+    const workoutEl = e.target.closest('.workout');
+    const closeBtn = e.target.closest('.workout__close--btn');
+
+    if (!closeBtn) return;
+
+    const workout = this.#workouts.find(
+      (work) => work.id === workoutEl.dataset.id
+    );
+
+    const workoutIndex = this.#workouts.indexOf(workout);
+
+    // Delete workout element
+    this.#workouts.splice(workoutIndex, 1);
+    workoutEl.remove();
+
+    // Delete marker
+    const deletedMarker = this.#markers.splice(workoutIndex, 1);
+    this.#map.removeLayer(deletedMarker[0]);
+
+    // Clear local storage
+    this._setLocalStorage();
   }
 
   _setLocalStorage() {
