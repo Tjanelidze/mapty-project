@@ -290,28 +290,33 @@ class App {
     // workout.click();
   }
 
+  _deleteWorkout(index) {
+    // Delete workout element
+    this.#workouts.splice(index, 1);
+
+    // Delete marker
+    const deletedMarker = this.#markers.splice(index, 1);
+    this.#map.removeLayer(deletedMarker[0]);
+
+    // Clear local storage
+    this._setLocalStorage();
+  }
+
   _closeWorkout(e) {
     const workoutEl = e.target.closest('.workout');
     const closeBtn = e.target.closest('.workout__close--btn');
 
     if (!closeBtn) return;
 
-    const workout = this.#workouts.find(
+    const workoutIndex = this.#workouts.findIndex(
       (work) => work.id === workoutEl.dataset.id
     );
 
-    const workoutIndex = this.#workouts.indexOf(workout);
-
-    // Delete workout element
-    this.#workouts.splice(workoutIndex, 1);
-    workoutEl.remove();
-
-    // Delete marker
-    const deletedMarker = this.#markers.splice(workoutIndex, 1);
-    this.#map.removeLayer(deletedMarker[0]);
-
-    // Clear local storage
-    this._setLocalStorage();
+    if (workoutIndex !== -1) {
+      // Delete workout element
+      workoutEl.remove();
+      this._deleteWorkout(workoutIndex);
+    }
   }
 
   _setLocalStorage() {
